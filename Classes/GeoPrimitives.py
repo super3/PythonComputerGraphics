@@ -144,6 +144,7 @@ class Line(Shape):
 		# Translate resulting points by xt = xf and yt = yf
 		self.translate(x,y)
 
+
 	# Hacks
 	def minX(self):
 		return min(self.x1,self.x2)

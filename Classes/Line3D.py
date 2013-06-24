@@ -92,8 +92,8 @@ class World3D:
 		for line in tmp_lines: 
 			line.scale_eq(translate[0], translate[1], scale)
 		# 4. Find the points between each start and end point using the line algorithm in section 2.1
-		for line in tmp_lines:
-			print(line)
+		#for line in tmp_lines:
+		#	print(line)
 		return tmp_lines
 
 # Arbitrary 3D View
@@ -171,7 +171,7 @@ class Arbit3D:
 				y = vertex[1] - vrp[1]
 				z = vertex[2] - vrp[2]
 				vertex = (x, y, z)
-		def eq2(self)
+		def eq2(self):
 			pass
 
 	def align(self, vrp, cop):	
@@ -196,9 +196,78 @@ class Arbit3D:
 
 
 # Unit Tests
+def float_eq(a, b, epsilon=0.01):
+	return abs(a - b) < epsilon
+
+def unit_test1():
+	"""Testing 4.7 Unit Tests #1"""
+	# Input: Wire-frame environment with one 3D line, Start Point = (35, 40, 70),
+	# End Point = (20, 30, 50), project onto a view plane located at d = 20
+	# Output: Projected Start-Point = (10, 11.43), Projected End-Point = (8, 12)
+	assert(Line3D((35,40,70),(20,30,50)).project(20).x1 == 10)
+	assert(float_eq(Line3D((35,40,70),(20,30,50)).project(20).y1, 11.43))
+	assert(Line3D((35,40,70),(20,30,50)).project(20).x2 == 8)
+	assert(Line3D((35,40,70),(20,30,50)).project(20).y2 == 12)
+
+	# Input: Wire-frame environment with one 3D line, Start Point =(35, 40, 70),
+	# End Point = (20, 30, 50), project onto a view plane located at d = −20
+	# Output: Projected Start-Point = (−10, −11.43), Projected End-Point = (−8, −12)
+	assert(Line3D((35,40,70),(20,30,50)).project(-20).x1 == -10)
+	assert(float_eq(Line3D((35,40,70),(20,30,50)).project(-20).y1, -11.43))
+	assert(Line3D((35,40,70),(20,30,50)).project(-20).x2 == -8)
+	assert(Line3D((35,40,70),(20,30,50)).project(-20).y2 == -12)
+
+def unit_test2():
+	"""Testing 4.7 Unit Tests #2"""
+	# Input: Wire-frame environment with one 3D line, Start Point = (35, 40, 70),
+	# End Point = (20, 30, 50), projected onto a view plane located at d = 20
+	# (using the projection algorithm in section 4.2) – translate to location 
+	# (160, 120), and scale by sf = 10
+	# Output: Displayed Start-Point = (170, 117), Displayed End-Point = (150, 123)
+	myworld = World3D()
+	myworld.add(Line3D((35,40,70), (20,30,50)))
+	assert(myworld.display(20, (160,120), 10)[0].x1 == 170)
+	assert(myworld.display(20, (160,120), 10)[0].y1 == 117)
+	assert(myworld.display(20, (160,120), 10)[0].x2 == 150)
+	assert(myworld.display(20, (160,120), 10)[0].y2 == 123)
+	
+
+	# Input: Wire-frame environment with two 3D line, Line 1 – Start
+	# Point = (35, 40, 70), and End Point = (20, 30, 50); Line 2 – Start
+	# Point = (55, 40, 20), and End Point = (30, 50, 10); projected onto a
+	# view plane located at d = 20 (using the projection algorithm
+	# in section 4.2) – translate to location (500, 500), and scale by
+	# sf = 10
+	# Output: Line 1 –Displayed Start-Point = (260, 57), and 
+	# Displayed End-Point = (240, 63); Line 2 – Displayed Start-Point = (710, 343),
+	# and Displayed End-Point = (760, 943)
+	
+	myworld1 = World3D()
+	myworld1.add(Line3D((35,40,70),(20,30,50)))
+	myworld1.add(Line3D((55,40,20),(30,50,10)))
+
+	assert(myworld1.display(20, (500,500), 10)[0].x1 == 260)
+	assert(myworld1.display(20, (500,500), 10)[0].y1 == 57)
+	assert(myworld1.display(20, (500,500), 10)[0].x2 == 240)
+	assert(myworld1.display(20, (500,500), 10)[0].y2 == 63)
+
+	assert(myworld1.display(20, (500,500), 10)[1].x1 == 710)
+	assert(myworld1.display(20, (500,500), 10)[1].y1 == 343)
+	assert(myworld1.display(20, (500,500), 10)[1].x2 == 760)
+	assert(myworld1.display(20, (500,500), 10)[1].y2 == 943)
+
+def unit_test3():
+	"""Testing 4.7 Unit Tests #3"""
+	pass
+
+
+# Main 
 if __name__ == "__main__":
-	world1 = World3D()
-	world1.add( Line3D( (35,40,70), (20,30,50) ) )
+	#world1 = World3D()
+	#world1.add( Line3D( (35,40,70), (20,30,50) ) )
 	#world1.align()
 	# VRP = (20, 20, 75), CoP = (0, 0, 20), ~u = (0.7071, 0.7071, 0), ~v = (0, 0, 1), ~n = (0.7071, −0.7071, 0)
 	# Output: Aligned Start-Point = (24.7487, −5, −23.5355), Aligned End-Point = (7.0711, −25, −27.0711)
+
+	unit_test1()
+	unit_test2()

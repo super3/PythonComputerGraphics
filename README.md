@@ -1,6 +1,8 @@
 Computer Graphics
 =========
-Practicing the fundamentals of computer graphics by building a 2D/3D graphic engine. Emphasis is placed on simplicing and code-reuse, rather than preformance. The finished results are outputted as [PPM files](http://netpbm.sourceforge.net/doc/ppm.html). 
+Practicing the fundamentals of computer graphics by building a 2D/3D graphic engine. Emphasis has been placed on simplicing and code-reuse, rather than preformance. The finished results are outputted as [PPM files](http://netpbm.sourceforge.net/doc/ppm.html). 
+
+Code is based on the text 'BASIC CONCEPTS FOR COMPUTER GRAPHICS' by [Dr. Amos Johnson](http://expandknowledge). All credits go to Dr.Johnson, but all code remains under [GPLv3](http://gplv3.fsf.org/). Enjoy!
 
 ***
 
