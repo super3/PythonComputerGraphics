@@ -96,6 +96,17 @@ class World3D:
 		#	print(line)
 		return tmp_lines
 
+	def finish(self):
+		# 1. Find the view reference coordinate system = [~u,~v, ~n] for α and β using the 3D view algorithm in
+		#    section 4.4
+
+		# 2. Align the 3D environment to the standard view for the VRP, CoP, and [~u,~v, ~n] using the 3D
+		#    view-alignment algorithm in section 4.5.
+
+		# 3. Project the vertex points to the view plane at z = −dn using the projection algorithm in section 4.2.
+
+		# 4. Use the display algorithm from section 4.3 to display the projected	vertex points as 2D lines.
+
 # Arbitrary 3D View
 class Arbit3D:
 	# Constructor
@@ -153,46 +164,59 @@ class Arbit3D:
 		# 7. Rotate the result of step 4 by α using Equations 4.16, 4.17, and 4.18
 		n = self.eq2(n, self.a)
 		
-		print(u)
-		print(v)
-		print(n) 
-		#return u,v,n
+		#print(u)
+		#print(v)
+		#print(n) 
+		return u,v,n
 
 # Arbit 3D View Alignment
+class ArbitAlign:
 	# Constructor
 	def __init__(self, vertex_list):
-		pass
+		self.vertex_list = vertex_list
 
 	# Equations
-		def eq(self, vrp):
-			"""4.28 to 4.30"""
-			for vertex in vertex_list:
-				x = vertex[0] - vrp[0]
-				y = vertex[1] - vrp[1]
-				z = vertex[2] - vrp[2]
-				vertex = (x, y, z)
-		def eq2(self):
-			pass
+	def eq(self, vertex, vrp):
+		"""4.28 to 4.30"""
+		x = vertex[0] - vrp[0]
+		y = vertex[1] - vrp[1]
+		z = vertex[2] - vrp[2]
+		return (x, y, z)
+	def eq2(self, vertex, u, v, n):
+		"""4.31-4.33"""
+		x = vertex[0] * u[0] + vertex[1] * u[1] + vertex[2] * u[2]
+		y = vertex[0] * v[0] + vertex[1] * v[1] + vertex[2] * v[2]  
+		z = vertex[0] * n[0] + vertex[1] * n[1] + vertex[2] * n[2]
+		return (x, y, z)
 
-	def align(self, vrp, cop):	
+	def align(self, vrp, cop, u, v, n):	
 		"""
 		A simple 3D view-alignment algorithm to align the view reference coordinate system
 		with the world coordinate-system, for a VRP = (xvrp, yvrp, zvrp), CoP = (0, 0, dn),
 		and view reference coordinate system = [~u,~v, ~n], is as follows:
 
 		"""
+		new_list = []
 
 		# 1. For each vertex point
-		for vertex in vertex_list:
+		for vertex in self.vertex_list:
 			# (a) Translate the x-values by -xvrp	using Equation 4.28
 			# (b) Translate the y-values by -yvrp	using Equation 4.29
 			# (c) Translate the z-values by -zvrp	using Equation 4.30
-			self.eq(vrp)
+			vertex = self.eq(vertex, vrp)
+
 			# (d) Rotate the new x-values from step (a) by ~u using Equation 4.31
 			# (e) Rotate the new y-values from step (b) by ~v using Equation 4.32
 			# (f) Rotate the new z-values from step (c) by ~n using Equation 4.33
+			
+			vertex = self.eq2(vertex, u, v, n)
+			
+
 			# (g) Translate the new z-values from step (f) by −dn	using Equation 4.36
-			pass
+			vertex = vertex[0], vertex[1], vertex[2] - cop[2]
+
+			new_list.append(vertex)
+		return new_list
 
 
 # Unit Tests
@@ -258,16 +282,38 @@ def unit_test2():
 
 def unit_test3():
 	"""Testing 4.7 Unit Tests #3"""
-	pass
+	arbit = Arbit3D(45, 90)
+	result = arbit.view()
+	assert(str(result) == "((0.7071, 0.0, -0.7071), (0.7071, 0.0, 0.7071), (0.0, -1.0, 0.0))")
 
+def unit_test4():
+	"""Testing 4.7 Unit Tests #4"""
+	#world = World3D()
+	#world.add( Line3D( (35,40,70), (20,30,50) ) )
+	#world.align()
+
+	vrp = (20, 20, 75)
+	cop = (0, 0, 20)
+	u = (0.7071, 0.7071, 0)
+	v = (0, 0, 1)
+	n = (0.7071, -0.7071, 0)
+
+	arbit = ArbitAlign([(35,40,70), (20,30,50)])
+	out = arbit.align(vrp, cop, u, v, n)
+
+	# VRP = (20, 20, 75), CoP = (0, 0, 20), ~u = (0.7071, 0.7071, 0), ~v = (0, 0, 1), ~n = (0.7071, −0.7071, 0)
+	# Output: Aligned Start-Point = (24.7487, −5, −23.5355), Aligned End-Point = (7.0711, −25, −27.0711)
+	assert(str(out) == "[(24.7485, -5, -23.5355), (7.071, -25, -27.070999999999998)]")
+
+def unit_test5():
+	"""Testing 4.7 Unit Test #5"""
+	world = World3D()
+	world.add( Line3D( (35,40,70), (20,30,50) ) )
+	world.finish()
 
 # Main 
 if __name__ == "__main__":
-	#world1 = World3D()
-	#world1.add( Line3D( (35,40,70), (20,30,50) ) )
-	#world1.align()
-	# VRP = (20, 20, 75), CoP = (0, 0, 20), ~u = (0.7071, 0.7071, 0), ~v = (0, 0, 1), ~n = (0.7071, −0.7071, 0)
-	# Output: Aligned Start-Point = (24.7487, −5, −23.5355), Aligned End-Point = (7.0711, −25, −27.0711)
-
 	unit_test1()
 	unit_test2()
+	unit_test3()
+	unit_test4()
