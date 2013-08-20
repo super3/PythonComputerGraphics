@@ -15,6 +15,7 @@ class Point3D:
 	# Constructor
 	def __init__(self, point):
 		self.point = point # 3-tuple
+		print(point)
 
 	# Equations
 	def eq(self, xya, za, d):
@@ -50,7 +51,7 @@ class Line3D:
 		x2, y2 = self.end_pt.get_2D_point(d)
 		
 		# Return a 2D line object
-		return Line(x1, y1, x2, y2)
+		return Line(x1, y1, x2, y2, (255, 0, 0))
 
 # World 3D
 class World3D:
@@ -80,6 +81,7 @@ class World3D:
 		# 3D to 2D Lines
 		tmp_lines = []
 		for line_3D in self.object_list:
+			print(line_3D)
 			tmp_lines.append( line_3D.project(d) )
 		# 1. Find the center of the 2D points using Equations 4.3 and 4.4.
 		xc, yc = self.get_center(tmp_lines)
@@ -204,6 +206,7 @@ class ArbitAlign:
 			# (a) Translate the x-values by -xvrp	using Equation 4.28
 			# (b) Translate the y-values by -yvrp	using Equation 4.29
 			# (c) Translate the z-values by -zvrp	using Equation 4.30
+			
 			vertex = self.eq(vertex, vrp)
 
 			# (d) Rotate the new x-values from step (a) by ~u using Equation 4.31
@@ -214,7 +217,7 @@ class ArbitAlign:
 			
 
 			# (g) Translate the new z-values from step (f) by −dn	using Equation 4.36
-			vertex = vertex[0], vertex[1], vertex[2] - cop[2]
+			vertex = vertex[0], vertex[1], vertex[2] + cop[2]
 
 			new_list.append(vertex)
 		return new_list
@@ -231,18 +234,24 @@ class DView:
 	def run(self):
 		# 1. Find the view reference coordinate system = [~u,~v, ~n] for α and β using the 3D view algorithm in
 		#    section 4.4
-		u, v, n = Arbit3D(self.a, self.b).view()
+		new_list = []
+		for point in self.point_list:
+			u, v, n = Arbit3D(self.a, self.b).view()
 
-		# 2. Align the 3D environment to the standard view for the VRP, CoP, and [~u,~v, ~n] using the 3D
-		#    view-alignment algorithm in section 4.5.
-		arbit = ArbitAlign(self.point_list)
-		out = arbit.align(self.vrp, self.cop, u, v, n)
+			# 2. Align the 3D environment to the standard view for the VRP, CoP, and [~u,~v, ~n] using the 3D
+			#    view-alignment algorithm in section 4.5.
+			arbit = ArbitAlign(point)
+			out = arbit.align(self.vrp, self.cop, u, v, n)
+			new_list.append(out)
 
 		# 3. Project the vertex points to the view plane at z = −dn using the projection algorithm in section 4.2.
 
 		# 4. Use the display algorithm from section 4.3 to display the projected vertex points as 2D lines.
+		#print(new_list)
+
 		myworld = World3D()
-		myworld.add(Line3D(out[0], out[1]))
+		for i in new_list:
+			myworld.add(Line3D(i[0], i[1]))
 		finish = myworld.display(self.cop[2], self.trans, self.scale)
 		return finish
 
@@ -363,14 +372,56 @@ def unit_test5():
 def ex1():
 	points = [(35, 40, 70), (20, 30, 50)]
 	outlines = DView(45, 90, (20, 20, 75), (0, 0, 20), points, (160,120), 80).run()
-	print(outlines[0])
+	#print(outlines[0])
+
+	# Create a Blank Image
+	img = Image(320, 240)
+	# Fill Image with Color
+	img.fill( (245, 245, 245) )
+	# Create Line Objects
+	#line1 = Line( 60, 120, 160, 120, (255, 0, 0) )
+	line1 = outlines[0]
+	print(line1)
+	# Draw Lines on Image
+	img.blit( line1 )
+	# Create/Write Image
+	img.save('test.ppm')
+
+def ex2():
+
+	# Create a Blank Image
+	img = Image(320, 240)
+	# Fill Image with Color
+	img.fill( (255, 255, 255) )
+
+	many_points = []
+	many_points.extend([ ((0, 0, 54), (0, 10, 54)), ((0, 0, 54), (16, 0, 54)), ((16, 0, 54), (16, 10, 54)) ])
+	many_points.extend([ ((16, 10, 54), (8, 16, 54)), ((8, 16, 54), (0, 10, 54)),  ((8, 16, 54), (8, 16, 30)) ])
+	many_points.extend([ ((8, 16, 30), (16, 10, 30)), ((16, 10, 30), (16, 0, 30)), ((16, 0, 30), (16, 0, 54)) ])
+	many_points.extend([ ((16, 10, 54), (16, 10, 30)), ((8, 16, 30), (0, 10, 30)), ((0, 10, 30), (0, 10, 54)) ])
+	many_points.extend([ ((0, 0, 54), (0, 0, 30)), ((0, 0, 30), (0, 10, 30)), ((0, 0, 30), (16, 0, 30)) ])
+
+	lines = DView(0, 0, (36, 25, 74), (0, 0, -25), many_points, (160,120), 10).run()
+	lines2 = DView(45, -45, (36, 25, 74), (0, 0, -25), many_points, (160,120), 10).run()
+
+	lines3 = DView(90, 0, (36, 25, 74), (0, 0, -25), many_points, (160,120), 10).run()
+	lines4 = DView(-45, 0, (8, 8, 54), (0, 0, -25), many_points, (160,120), 10).run()
+	#print(lines)
+	for line in lines4:
+		# Draw Lines on Image
+		img.blit( line )
+	
+	# Create/Write Image
+	img.save('house4.ppm')
+
 
 # Main 
 if __name__ == "__main__":
-	unit_test1()
-	unit_test2()
-	unit_test3()
-	unit_test4()
-	unit_test5()
+	#unit_test1()
+	#unit_test2()
+	#unit_test3()
+	#unit_test4()
+	#unit_test5()
 
-	ex1()
+	#ex1()
+	ex2()
