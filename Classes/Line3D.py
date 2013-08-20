@@ -371,7 +371,7 @@ def unit_test5():
 
 def ex1():
 	points = [(35, 40, 70), (20, 30, 50)]
-	outlines = DView(45, 90, (20, 20, 75), (0, 0, 20), points, (160,120), 80).run()
+	outlines = DView(45, 90, (20, 20, 75), (0, 0, -20), points, (160,120), 80).run()
 	#print(outlines[0])
 
 	# Create a Blank Image
@@ -412,7 +412,7 @@ def ex2():
 		img.blit( line )
 	
 	# Create/Write Image
-	img.save('house4.ppm')
+	img.save('house5.ppm')
 
 
 # Main 
@@ -423,5 +423,5 @@ if __name__ == "__main__":
 	#unit_test4()
 	#unit_test5()
 
-	#ex1()
-	ex2()
+	ex1()
+	#ex2()
