@@ -106,6 +106,7 @@ class World3D:
 		# 3. Project the vertex points to the view plane at z = −dn using the projection algorithm in section 4.2.
 
 		# 4. Use the display algorithm from section 4.3 to display the projected	vertex points as 2D lines.
+		pass
 
 # Arbitrary 3D View
 class Arbit3D:
@@ -218,6 +219,34 @@ class ArbitAlign:
 			new_list.append(vertex)
 		return new_list
 
+class DView:
+	def __init__(self, a, b, vrp, cop, point_list, trans, scale):
+		self.a = a
+		self.b = b
+		self.vrp = vrp
+		self.cop = cop
+		self.point_list = point_list
+		self.trans = trans
+		self.scale = scale
+	def run(self):
+		# 1. Find the view reference coordinate system = [~u,~v, ~n] for α and β using the 3D view algorithm in
+		#    section 4.4
+		u, v, n = Arbit3D(self.a, self.b).view()
+
+		# 2. Align the 3D environment to the standard view for the VRP, CoP, and [~u,~v, ~n] using the 3D
+		#    view-alignment algorithm in section 4.5.
+		arbit = ArbitAlign(self.point_list)
+		out = arbit.align(self.vrp, self.cop, u, v, n)
+
+		# 3. Project the vertex points to the view plane at z = −dn using the projection algorithm in section 4.2.
+
+		# 4. Use the display algorithm from section 4.3 to display the projected vertex points as 2D lines.
+		myworld = World3D()
+		myworld.add(Line3D(out[0], out[1]))
+		finish = myworld.display(self.cop[2], self.trans, self.scale)
+		return finish
+
+		
 
 # Unit Tests
 def float_eq(a, b, epsilon=0.01):
@@ -307,9 +336,34 @@ def unit_test4():
 
 def unit_test5():
 	"""Testing 4.7 Unit Test #5"""
-	world = World3D()
-	world.add( Line3D( (35,40,70), (20,30,50) ) )
-	world.finish()
+	#world = World3D()
+	#world.add( Line3D( (35,40,70), (20,30,50) ) )
+	#world.finish()
+
+	# – Input: Wire-frame environment with one 3D line, Start Point =
+	# (35, 40, 70), End Point = (20, 30, 50). VRP = (20, 20, 75), CoP =
+	# (0, 0, 20), α = 45, and β = 90. Translate to location (160, 120),
+	# and scale by sf = 10
+	# – Output: Displayed Start-Point = (136, 197), Displayed End-Point
+	# = (184, 43)
+
+	DView(45, 90, (20, 20, 75), (0, 0, 20), [(35, 40, 70), (20, 30, 50)], (160,120), 10).run()
+
+	# – Input: Wire-frame environment with one 3D line, Start Point =
+	# (35, 40, 70), End Point = (20, 30, 50). VRP = (0, 0, 20), CoP =
+	# (0, 0, −20), α = 0, and β = 0. Translate to location (160, 120),
+	# and scale by sf = 10
+	# 4.8. REVIEW QUESTIONS 65
+	# – Output: Displayed Start-Point = (170, 117), Displayed End-Point
+	# = (150, 123)
+
+	test = DView(0, 0, (0, 0, 20), (0, 0, -20), [(35, 40, 70), (20, 30, 50)], (160,120), 10).run()
+	#print(test[0])
+
+def ex1():
+	points = [(35, 40, 70), (20, 30, 50)]
+	outlines = DView(45, 90, (20, 20, 75), (0, 0, 20), points, (160,120), 80).run()
+	print(outlines[0])
 
 # Main 
 if __name__ == "__main__":
@@ -317,3 +371,6 @@ if __name__ == "__main__":
 	unit_test2()
 	unit_test3()
 	unit_test4()
+	unit_test5()
+
+	ex1()
